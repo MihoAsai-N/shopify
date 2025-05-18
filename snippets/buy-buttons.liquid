@@ -96,6 +96,17 @@
             </span>
             {%- render 'loading-spinner' -%}
           </button>
+          {% comment %}
+            在庫数に応じたメッセージを表示する（5個未満なら "Low stock"、5個以上なら "Available!"）
+            表示位置は「Add to cart」ボタンの直下
+          {% endcomment %}
+          {%- assign inventory = product.selected_or_first_available_variant.inventory_quantity -%}
+          {% if inventory < 5 %}
+            <p style="color: red; margin: 0.5rem 0;">Low stock</p>
+          {% else %}
+            <p style="color: green; margin: 0.5rem 0;">Available!</p>
+          {% endif %}
+
           {%- if show_dynamic_checkout -%}
             {{ form | payment_button }}
           {%- endif -%}
