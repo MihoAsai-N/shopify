@@ -593,3 +593,17 @@
     clip-path: polygon(var(--shape--blob-5));
   }
 }
+/* カートに追加するボタンの在庫状態に応じた色設定 */
+button.product-form__submit.in-stock.button--secondary {
+  background-color: green;
+  color: white;
+}
+
+button.product-form__submit.in-stock.button--secondary:hover {
+  background-color: blue;
+  color: white;
+}
+button.product-form__submit.out-of-stock.button--secondary {
+  background-color: red;
+  color: white;
+}
