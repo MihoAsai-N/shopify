@@ -594,16 +594,17 @@
   }
 }
 /* カートに追加するボタンの在庫状態に応じた色設定 */
-button.product-form__submit.in-stock.button--secondary {
+button.product-form__submit.in-stock {
   background-color: green;
   color: white;
 }
 
-button.product-form__submit.in-stock.button--secondary:hover {
+button.product-form__submit.in-stock:hover {
   background-color: blue;
   color: white;
 }
-button.product-form__submit.out-of-stock.button--secondary {
+
+button.product-form__submit.out-of-stock {
   background-color: red;
   color: white;
 }
