@@ -731,33 +731,46 @@
   {% endcomment %}
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const descEl = document.getElementById('variant-size-description');
+      const addToCartBtn = document.getElementById('ProductSubmitButton-{{ section.id }}');
       const variantIdInput = document.querySelector('input[name="id"]');
 
-      if (!descEl || !variantIdInput) return;
-
-      const updateDescription = (variantId) => {
+      const updateButtonStyle = (variantId) => {
         fetch(`/variants/${variantId}.js`)
           .then((res) => res.json())
           .then((variant) => {
-            const desc = variant?.metafields?.custom?.size_description;
-            descEl.textContent = desc || '';
-          })
-          .catch((err) => {
-            console.error('メタフィールド取得エラー:', err);
-            descEl.textContent = '';
+            // ボタンの状態を更新
+            if (addToCartBtn) {
+              // まず既存クラスをクリア
+              addToCartBtn.classList.remove('button--sold-out', 'button--in-stock');
+
+              // 在庫ありかどうかでクラスを切り替える
+              if (variant.available) {
+                addToCartBtn.classList.add('button--in-stock');
+              } else {
+                addToCartBtn.classList.add('button--sold-out');
+              }
+            }
+
+            // サイズ説明の更新（すでに導入済みなら省略可）
+            const descEl = document.getElementById('variant-size-description');
+            if (descEl) {
+              const desc = variant?.metafields?.custom?.size_description;
+              descEl.textContent = desc || '';
+            }
           });
       };
 
       // 初期表示
-      updateDescription(variantIdInput.value);
+      if (variantIdInput) {
+        updateButtonStyle(variantIdInput.value);
+      }
 
-      // バリエーション選択肢の変更を監視
+      // バリエーション変更時
       document.querySelectorAll('input[type="radio"][name^="options"]').forEach((radio) => {
         radio.addEventListener('change', () => {
           const selectedId = document.querySelector('input[name="id"]')?.value;
           if (selectedId) {
-            updateDescription(selectedId);
+            updateButtonStyle(selectedId);
           }
         });
       });
