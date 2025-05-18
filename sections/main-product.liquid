@@ -356,7 +356,10 @@
                                 </dt>
                                 <dd>
                                   <span class="price-per-item--current">
-                                    {{- 'products.product.volume_pricing.price_at_each_html' | t: price: variant_price -}}
+                                    {{-
+                                      'products.product.volume_pricing.price_at_each_html'
+                                      | t: price: variant_price
+                                    -}}
                                   </span>
                                 </dd>
                               </dl>
@@ -722,6 +725,44 @@
       {{ product | structured_data }}
     </script>
   </div>
+  {% comment %}
+    選択中のバリエーションに応じて、メタフィールド「サイズ説明（size_description）」の内容を動的に表示するためのスクリプト
+    Shopifyの `/variants/{{ id }}.js` エンドポイントを使って該当バリエーションの情報を取得し、要素 #variant-size-description を更新する
+  {% endcomment %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const descEl = document.getElementById('variant-size-description');
+      const variantIdInput = document.querySelector('input[name="id"]');
+
+      if (!descEl || !variantIdInput) return;
+
+      const updateDescription = (variantId) => {
+        fetch(`/variants/${variantId}.js`)
+          .then((res) => res.json())
+          .then((variant) => {
+            const desc = variant?.metafields?.custom?.size_description;
+            descEl.textContent = desc || '';
+          })
+          .catch((err) => {
+            console.error('メタフィールド取得エラー:', err);
+            descEl.textContent = '';
+          });
+      };
+
+      // 初期表示
+      updateDescription(variantIdInput.value);
+
+      // バリエーション選択肢の変更を監視
+      document.querySelectorAll('input[type="radio"][name^="options"]').forEach((radio) => {
+        radio.addEventListener('change', () => {
+          const selectedId = document.querySelector('input[name="id"]')?.value;
+          if (selectedId) {
+            updateDescription(selectedId);
+          }
+        });
+      });
+    });
+  </script>
 </product-info>
 
 {% schema %}
@@ -1674,7 +1715,7 @@
         {
           "type": "header",
           "content": "t:sections.main-product.blocks.icon_with_text.settings.pairing_2.label"
-        },        
+        },
         {
           "type": "select",
           "id": "icon_2",
@@ -1874,7 +1915,7 @@
         {
           "type": "header",
           "content": "t:sections.main-product.blocks.icon_with_text.settings.pairing_3.label"
-        },        
+        },
         {
           "type": "select",
           "id": "icon_3",
@@ -2176,7 +2217,7 @@
       ],
       "default": "hide",
       "label": "t:sections.main-product.settings.mobile_thumbnails.label"
-    },    
+    },
     {
       "type": "select",
       "id": "media_position",
