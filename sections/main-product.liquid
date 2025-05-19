@@ -767,14 +767,18 @@
       };
 
       const fetchVariantData = (variantId) => {
+        console.log('fetchVariantData 実行: variantId =', variantId);
         fetch(`/variants/${variantId}.js`)
-          .then((res) => res.json())
+          .then((res) => {
+            console.log('レスポンスステータス:', res.status);
+            res.json();
+          })
           .then((variant) => {
-            console.log('選択されたバリエーション:', variant);
+            console.log('選択されたバリエーション:', variant); //ここが出ないなら.then()に入ってない
             updateUIWithVariant(variant);
           })
           .catch((err) => {
-            console.error('バリエーション取得失敗:', err);
+            console.error('バリエーション取得失敗:', err); //ここが出るならfetch失敗
           });
       };
 
