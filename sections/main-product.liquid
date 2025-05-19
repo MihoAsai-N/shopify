@@ -747,6 +747,7 @@
     Shopifyの `/variants/{{ id }}.js` エンドポイントを使って該当バリエーションの情報を取得し、要素 #variant-size-description を更新する
   {% endcomment %}
   <script>
+    console.log('スクリプト読み込み成功');
     function setupVariantChangeHandler() {
       const productForm = document.querySelector('form#ProductForm-{{ section.id }}');
       const addToCartBtn = productForm?.querySelector('[type="submit"]');
@@ -771,7 +772,7 @@
         fetch(`/variants/${variantId}.js`)
           .then((res) => {
             console.log('レスポンスステータス:', res.status);
-            res.json();
+            return res.json();
           })
           .then((variant) => {
             console.log('選択されたバリエーション:', variant); //ここが出ないなら.then()に入ってない
