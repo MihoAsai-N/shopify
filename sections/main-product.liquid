@@ -466,6 +466,13 @@
 
               {%- when 'variant_picker' -%}
                 {% render 'product-variant-picker', product: product, block: block, product_form_id: product_form_id %}
+                {% comment %} 「バリエーションに応じて表示を切り替えたいサイズ説明文」を表示するための要素で {% endcomment %}
+                <p
+                  id="variant-size-description"
+                  class="size-description"
+                  style="margin-top: 0.5rem; font-size: 0.9rem;"
+                ></p>
+
               {%- when 'buy_buttons' -%}
                 {%- render 'buy-buttons',
                   block: block,
@@ -725,56 +732,73 @@
       {{ product | structured_data }}
     </script>
   </div>
+
+  <script id="VariantMeta" type="application/json">
+    {
+      {% for variant in product.variants %}
+        "{{ variant.id }}": {
+          "size_description": "{{ variant.metafields.custom.size_description | escape }}"
+        }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    }
+  </script>
   {% comment %}
     選択中のバリエーションに応じて、メタフィールド「サイズ説明（size_description）」の内容を動的に表示するためのスクリプト
     Shopifyの `/variants/{{ id }}.js` エンドポイントを使って該当バリエーションの情報を取得し、要素 #variant-size-description を更新する
   {% endcomment %}
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const addToCartBtn = document.getElementById('ProductSubmitButton-{{ section.id }}');
-      const variantIdInput = document.querySelector('input[name="id"]');
+    function setupVariantChangeHandler() {
+      const productForm = document.querySelector('form#ProductForm-{{ section.id }}');
+      const addToCartBtn = productForm?.querySelector('[type="submit"]');
 
-      const updateButtonStyle = (variantId) => {
+      const updateUIWithVariant = (variant) => {
+        // ボタンの在庫状態
+        if (addToCartBtn) {
+          addToCartBtn.classList.remove('in-stock', 'out-of-stock');
+          addToCartBtn.classList.add(variant.available ? 'in-stock' : 'out-of-stock');
+        }
+
+        // サイズ説明の表示更新
+        const descEl = document.getElementById('variant-size-description');
+        if (descEl) {
+          const desc = variant.metafields?.custom?.size_description;
+          descEl.textContent = desc || '';
+        }
+      };
+
+      const fetchVariantData = (variantId) => {
         fetch(`/variants/${variantId}.js`)
           .then((res) => res.json())
           .then((variant) => {
-            // ボタンの状態を更新
-            if (addToCartBtn) {
-              // まず既存クラスをクリア
-              addToCartBtn.classList.remove('button--sold-out', 'button--in-stock');
-
-              // 在庫ありかどうかでクラスを切り替える
-              if (variant.available) {
-                addToCartBtn.classList.add('in-stock');
-              } else {
-                addToCartBtn.classList.add('out-of-stock');
-              }
-            }
-
-            // サイズ説明の更新（すでに導入済みなら省略可）
-            const descEl = document.getElementById('variant-size-description');
-            if (descEl) {
-              const desc = variant?.metafields?.custom?.size_description;
-              descEl.textContent = desc || '';
-            }
+            console.log('選択されたバリエーション:', variant);
+            updateUIWithVariant(variant);
+          })
+          .catch((err) => {
+            console.error('バリエーション取得失敗:', err);
           });
       };
 
       // 初期表示
-      if (variantIdInput) {
-        updateButtonStyle(variantIdInput.value);
+      const initialId = productForm?.querySelector('input[name="id"]')?.value;
+      if (initialId) {
+        fetchVariantData(initialId);
       }
 
-      // バリエーション変更時
-      document.querySelectorAll('input[type="radio"][name^="options"]').forEach((radio) => {
-        radio.addEventListener('change', () => {
-          const selectedId = document.querySelector('input[name="id"]')?.value;
-          if (selectedId) {
-            updateButtonStyle(selectedId);
-          }
-        });
+      // バリエーション変更検知
+      document.addEventListener('change', (e) => {
+        if (e.target.name && e.target.name.startsWith('options')) {
+          setTimeout(() => {
+            const selectedId = document.querySelector('input[name="id"]')?.value;
+            if (selectedId) {
+              fetchVariantData(selectedId);
+            }
+          }, 0);
+        }
       });
-    });
+    }
+
+    document.addEventListener('DOMContentLoaded', setupVariantChangeHandler);
+    document.addEventListener('shopify:section:load', setupVariantChangeHandler);
   </script>
 </product-info>
 
