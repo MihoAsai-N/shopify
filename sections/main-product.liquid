@@ -792,35 +792,24 @@
       }
 
       // バリエーション変更検知
-      {% comment %} document.addEventListener('change', (e) => {
-        if (e.target.name && e.target.name.startsWith('options')) {
-          setTimeout(() => {
-            const selectedId = document.querySelector('input[name="id"]')?.value;
-            if (selectedId) {
-              fetchVariantData(selectedId);
-            }
-          }, 0);
-        }
-      }); {% endcomment %}
-      const optionInputs = document.querySelectorAll(
-      'fieldset[data-product-variant-picker] input[type="radio"], select[name^="options"]'
-      );
-      console.log('optionInputs length:', optionInputs.length);
+      requestAnimationFrame(() => {
+        const optionInputs = document.querySelectorAll('fieldset.product-form__input input[type="radio"]');
+        console.log('optionInputs length:', optionInputs.length);
 
-      optionInputs.forEach((input) => {
-        input.addEventListener('change', () => {
-          requestAnimationFrame(() => {
-            const selectedId = document.querySelector('input[name="id"]')?.value;
-            console.log('バリエーション変更検知: variantId =', selectedId);
-            if (selectedId) {
-              fetchVariantData(selectedId);
-            }
+        optionInputs.forEach((input) => {
+          input.addEventListener('change', () => {
+            requestAnimationFrame(() => {
+              const selectedId = document.querySelector('input[name="id"]')?.value;
+              console.log('バリエーション変更検知: variantId =', selectedId);
+              if (selectedId) {
+                fetchVariantData(selectedId);
+              }
+            });
           });
         });
       });
-
     }
-
+    // 初期読み込みとセクション再読み込み時
     document.addEventListener('DOMContentLoaded', setupVariantChangeHandler);
     document.addEventListener('shopify:section:load', setupVariantChangeHandler);
   </script>
