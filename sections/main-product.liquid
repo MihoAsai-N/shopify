@@ -750,6 +750,7 @@
     console.log('スクリプト読み込み成功');
     function setupVariantChangeHandler() {
       const productForm = document.querySelector('form#ProductForm-{{ section.id }}');
+      console.log('productForm:', productForm);
       const addToCartBtn = productForm?.querySelector('[type="submit"]');
 
       const updateUIWithVariant = (variant) => {
@@ -785,6 +786,7 @@
 
       // 初期表示
       const initialId = productForm?.querySelector('input[name="id"]')?.value;
+      console.log('initialId:', initialId);
       if (initialId) {
         fetchVariantData(initialId);
       }
