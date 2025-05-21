@@ -793,13 +793,13 @@
 
       // バリエーション変更検知
       requestAnimationFrame(() => {
-        const optionInputs = document.querySelectorAll('fieldset.product-form__input input[type="radio"]');
+        const optionInputs = productForm.querySelectorAll('fieldset.product-form__input input[type="radio"]');
         console.log('optionInputs length:', optionInputs.length);
 
         optionInputs.forEach((input) => {
           input.addEventListener('change', () => {
             requestAnimationFrame(() => {
-              const selectedId = document.querySelector('input[name="id"]')?.value;
+              const selectedId = productForm.querySelector('input[name="id"]')?.value;
               console.log('バリエーション変更検知: variantId =', selectedId);
               if (selectedId) {
                 fetchVariantData(selectedId);
