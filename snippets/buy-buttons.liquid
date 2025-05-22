@@ -110,6 +110,14 @@
           {%- if show_dynamic_checkout -%}
             {{ form | payment_button }}
           {%- endif -%}
+          {% comment %}
+            選択中のバリエーション（サイズ）のメタフィールド「サイズ説明」を表示する
+            表示位置は「Buy it now」ボタンの下
+            S/M/L の選択に応じて JS で内容が切り替わる
+          {% endcomment %}
+          <p id="variant-size-description" style="margin-top: 0.5rem;">
+            {{ product.selected_or_first_available_variant.metafields.custom.size_description }}
+          </p>
         </div>
       {%- endform -%}
     </product-form>
